@@ -1,0 +1,152 @@
+# This is the OpenAPI specification for your service. It is used to generate the client code.
+# To generate the server code, use the Gradle task `openApiGenerate`. The 
+# generated code will be placed in `build/generate-resources/main`.
+#
+# We will evaluate you based on how well you design your API.
+# 1. How well it follows REST principles.
+# 2. How easy it is to understand and use.
+#
+# References
+# 1. https://swagger.io/specification/
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: User Service
+  license:
+    name: MIT
+servers:
+  - url: http://localhost
+paths:
+  /hello:
+    get:
+      summary: This is just a test endpoint to get you started. Please delete this endpoint or just modify
+      operationId: hello
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Test return
+          content:
+            application/json:    
+              schema:
+                $ref: "#/components/schemas/HelloResponse"
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /registration:
+    post:
+      summary: Register a new user
+      requestBody:
+        description: User registration data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phoneNumber:
+                  type: string
+                  minLength: 10
+                  maxLength: 13
+                  pattern: '^\+62\d+$'
+                fullName:
+                  type: string
+                  minLength: 3
+                  maxLength: 60
+                password:
+                  type: string
+                  minLength: 6
+                  maxLength: 64
+                  pattern: '^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                    description: ID of the newly registered user
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          description: The field that failed validation
+                        rule:
+                          type: string
+                          description: The validation rule that was not met
+              example:
+                errors:
+                  - field: phoneNumber
+                    rule: "Must start with +62"
+                  - field: password
+                    rule: "Must contain at least 1 capital letter, 1 number, and 1 special character"
+  /login:
+    post:
+      summary: User Login
+      requestBody:
+        description: User login data
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                phoneNumber:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: integer
+                    description: ID of the logged-in user
+                  jwtToken:
+                    type: string
+                    description: JSON Web Token (JWT) with algorithm RS256
+        '400':
+          description: Bad Request
+components:
+  schemas:
+    HelloResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+
+  
