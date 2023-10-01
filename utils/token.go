@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -11,10 +12,18 @@ import (
 // SecretKey should be a long, random string used to sign the JWT token.
 var SecretKey = []byte("your-secret-key")
 
-// GetUserIDFromToken retrieves the user ID from a JWT token stored in the request context.
+// GetUserIDFromToken retrieves the user ID from a Bearer token stored in the Authorization header.
 func GetUserIDFromToken(c echo.Context) (int, error) {
-	// Get the JWT token string from the Authorization header
-	tokenString := c.Request().Header.Get("Authorization")
+	// Get the Authorization header value
+	authHeader := c.Request().Header.Get("Authorization")
+
+	// Check if the header value is empty or doesn't start with "Bearer "
+	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
+		return 0, echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+	}
+
+	// Extract the token string by removing "Bearer " prefix
+	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
 	// Parse the JWT token
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -41,7 +50,6 @@ func GetUserIDFromToken(c echo.Context) (int, error) {
 	return 0, echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
 }
 
-// GenerateJWTToken generates a JWT token for a user with the given userID.
 func GenerateJWTToken(userID int) (string, error) {
 	// Define the claims for the JWT token
 	claims := jwt.MapClaims{
