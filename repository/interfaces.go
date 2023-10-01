@@ -10,6 +10,6 @@ type RepositoryInterface interface {
 	GetTestById(ctx context.Context, input GetTestByIdInput) (output GetTestByIdOutput, err error)
 	RegisterUser(ctx context.Context, phoneNumber, fullName, passwordHash string) (int, error)
 	LoginUser(ctx context.Context, phoneNumber, passwordHash string) (int, error)
-	GetMyProfile(ctx context.Context, userID int) (string, string, error)
+	GetMyProfile(ctx context.Context, userID int, anotherAttr ...string) (string, string, error)
 	UpdateMyProfile(ctx context.Context, userID int, phoneNumber, fullName string) error
 }

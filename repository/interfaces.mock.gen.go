@@ -35,9 +35,13 @@ func (m *MockRepositoryInterface) EXPECT() *MockRepositoryInterfaceMockRecorder 
 }
 
 // GetMyProfile mocks base method.
-func (m *MockRepositoryInterface) GetMyProfile(ctx context.Context, userID int) (string, string, error) {
+func (m *MockRepositoryInterface) GetMyProfile(ctx context.Context, userID int, anotherAttr ...string) (string, string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetMyProfile", ctx, userID)
+	varargs := []interface{}{ctx, userID}
+	for _, a := range anotherAttr {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetMyProfile", varargs...)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(string)
 	ret2, _ := ret[2].(error)
@@ -45,9 +49,10 @@ func (m *MockRepositoryInterface) GetMyProfile(ctx context.Context, userID int) 
 }
 
 // GetMyProfile indicates an expected call of GetMyProfile.
-func (mr *MockRepositoryInterfaceMockRecorder) GetMyProfile(ctx, userID interface{}) *gomock.Call {
+func (mr *MockRepositoryInterfaceMockRecorder) GetMyProfile(ctx, userID interface{}, anotherAttr ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMyProfile", reflect.TypeOf((*MockRepositoryInterface)(nil).GetMyProfile), ctx, userID)
+	varargs := append([]interface{}{ctx, userID}, anotherAttr...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMyProfile", reflect.TypeOf((*MockRepositoryInterface)(nil).GetMyProfile), varargs...)
 }
 
 // GetTestById mocks base method.

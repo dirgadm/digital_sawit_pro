@@ -137,6 +137,71 @@ paths:
                     description: JSON Web Token (JWT) with algorithm RS256
         '400':
           description: Bad Request
+  /profile:
+    get:
+      summary: Get user profile
+      description: Retrieve user profile information.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fullName:
+                    type: string
+                    description: Full name of the user
+                  phoneNumber:
+                    type: string
+                    description: Phone number of the user
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+
+    put:
+      summary: Update user profile
+      description: Update user profile information. Requires authorization.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        '200':
+          description: User profile updated successfully
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Error message
 components:
   schemas:
     HelloResponse:
@@ -153,5 +218,17 @@ components:
       properties:
         message:
           type: string
+    UpdateProfileRequest:
+      type: object
+      properties:
+        phoneNumber:
+          type: string
+          minLength: 10
+          maxLength: 13
+          pattern: '^\+62\d+$'
+        fullName:
+          type: string
+          minLength: 3
+          maxLength: 60
 
   

@@ -66,7 +66,7 @@ func (r *Repository) LoginUser(ctx context.Context, phoneNumber, passwordHash st
 	return id, nil
 }
 
-func (r *Repository) GetMyProfile(ctx context.Context, userID int) (phoneNumber string, fullName string, err error) {
+func (r *Repository) GetMyProfile(ctx context.Context, userID int, anotherAttr ...string) (phoneNumber string, fullName string, err error) {
 	// db, err := sql.Open("postgres", "user=username dbname=mydb sslmode=disable")
 	// if err != nil {
 	//     return "", "", err
