@@ -15,3 +15,17 @@ CREATE TABLE test (
 
 INSERT INTO test (name) VALUES ('test1');
 INSERT INTO test (name) VALUES ('test2');
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    phone_number VARCHAR(13) UNIQUE NOT NULL,
+    full_name VARCHAR(60) NOT NULL,
+    password_hash TEXT NOT NULL
+);
+
+CREATE TABLE login_attempts (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES users(id),
+    login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    successful BOOLEAN NOT NULL
+);

@@ -54,15 +54,18 @@ paths:
               properties:
                 phoneNumber:
                   type: string
+                  nullable: false
                   minLength: 10
                   maxLength: 13
                   pattern: '^\+62\d+$'
                 fullName:
                   type: string
+                  nullable: false
                   minLength: 3
                   maxLength: 60
                 password:
                   type: string
+                  nullable: false
                   minLength: 6
                   maxLength: 64
                   pattern: '^(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])'
@@ -114,8 +117,10 @@ paths:
               properties:
                 phoneNumber:
                   type: string
+                  nullable: false  # Set nullable to false to generate a non-pointer type
                 password:
                   type: string
+                  nullable: false  # Set nullable to false to generate a non-pointer type
       responses:
         '200':
           description: Successful login

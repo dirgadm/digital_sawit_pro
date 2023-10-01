@@ -34,6 +34,22 @@ func (m *MockRepositoryInterface) EXPECT() *MockRepositoryInterfaceMockRecorder 
 	return m.recorder
 }
 
+// GetMyProfile mocks base method.
+func (m *MockRepositoryInterface) GetMyProfile(ctx context.Context, userID int) (string, string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetMyProfile", ctx, userID)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
+}
+
+// GetMyProfile indicates an expected call of GetMyProfile.
+func (mr *MockRepositoryInterfaceMockRecorder) GetMyProfile(ctx, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetMyProfile", reflect.TypeOf((*MockRepositoryInterface)(nil).GetMyProfile), ctx, userID)
+}
+
 // GetTestById mocks base method.
 func (m *MockRepositoryInterface) GetTestById(ctx context.Context, input GetTestByIdInput) (GetTestByIdOutput, error) {
 	m.ctrl.T.Helper()
@@ -47,4 +63,48 @@ func (m *MockRepositoryInterface) GetTestById(ctx context.Context, input GetTest
 func (mr *MockRepositoryInterfaceMockRecorder) GetTestById(ctx, input interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTestById", reflect.TypeOf((*MockRepositoryInterface)(nil).GetTestById), ctx, input)
+}
+
+// LoginUser mocks base method.
+func (m *MockRepositoryInterface) LoginUser(ctx context.Context, phoneNumber, passwordHash string) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LoginUser", ctx, phoneNumber, passwordHash)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// LoginUser indicates an expected call of LoginUser.
+func (mr *MockRepositoryInterfaceMockRecorder) LoginUser(ctx, phoneNumber, passwordHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoginUser", reflect.TypeOf((*MockRepositoryInterface)(nil).LoginUser), ctx, phoneNumber, passwordHash)
+}
+
+// RegisterUser mocks base method.
+func (m *MockRepositoryInterface) RegisterUser(ctx context.Context, phoneNumber, fullName, passwordHash string) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RegisterUser", ctx, phoneNumber, fullName, passwordHash)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RegisterUser indicates an expected call of RegisterUser.
+func (mr *MockRepositoryInterfaceMockRecorder) RegisterUser(ctx, phoneNumber, fullName, passwordHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterUser", reflect.TypeOf((*MockRepositoryInterface)(nil).RegisterUser), ctx, phoneNumber, fullName, passwordHash)
+}
+
+// UpdateMyProfile mocks base method.
+func (m *MockRepositoryInterface) UpdateMyProfile(ctx context.Context, userID int, phoneNumber, fullName string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMyProfile", ctx, userID, phoneNumber, fullName)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMyProfile indicates an expected call of UpdateMyProfile.
+func (mr *MockRepositoryInterfaceMockRecorder) UpdateMyProfile(ctx, userID, phoneNumber, fullName interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMyProfile", reflect.TypeOf((*MockRepositoryInterface)(nil).UpdateMyProfile), ctx, userID, phoneNumber, fullName)
 }
