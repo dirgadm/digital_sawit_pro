@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"fmt"
 
 	"github.com/SawitProRecruitment/UserService/models"
 	"github.com/SawitProRecruitment/UserService/utils"
@@ -18,11 +17,6 @@ func (r *Repository) GetTestById(ctx context.Context, input GetTestByIdInput) (o
 }
 
 func (r *Repository) RegisterUser(ctx context.Context, phoneNumber, fullName, passwordHash string) (out int, err error) {
-	// db, err := sql.Open("postgres", "user=username dbname=mydb sslmode=disable")
-	// err = r.Db.Conn()(ctx, "SELECT name FROM test WHERE id = $1", input.Id).Scan(&output.Name)
-	// if err != nil {
-	//     return 0, err
-	// }
 	defer r.Db.Close()
 
 	var id int
@@ -40,17 +34,12 @@ func (r *Repository) RegisterUser(ctx context.Context, phoneNumber, fullName, pa
 }
 
 func (r *Repository) LoginUser(ctx context.Context, phoneNumber, passwordHash string) (out *models.Result, err error) {
-	// db, err := sql.Open("postgres", "user=username dbname=mydb sslmode=disable")
-	// if err != nil {
-	//     return 0, err
-	// }
 	out = new(models.Result)
 
 	defer r.Db.Close()
 	err = r.Db.QueryRowContext(ctx, `
         SELECT id,password_hash FROM users WHERE phone_number = $1
     `, phoneNumber).Scan(&out.ID, &out.PasswordHash)
-	fmt.Println(out, "------------------->", err)
 	if err != nil {
 		return nil, err
 	}
@@ -69,10 +58,6 @@ func (r *Repository) LoginUser(ctx context.Context, phoneNumber, passwordHash st
 }
 
 func (r *Repository) GetMyProfile(ctx context.Context, userID int, anotherAttr ...string) (phoneNumber string, fullName string, err error) {
-	// db, err := sql.Open("postgres", "user=username dbname=mydb sslmode=disable")
-	// if err != nil {
-	//     return "", "", err
-	// }
 	defer r.Db.Close()
 
 	err = r.Db.QueryRowContext(ctx, `
@@ -87,10 +72,6 @@ func (r *Repository) GetMyProfile(ctx context.Context, userID int, anotherAttr .
 }
 
 func (r *Repository) UpdateMyProfile(ctx context.Context, userID int, phoneNumber, fullName string) (err error) {
-	// db, err := sql.Open("postgres", "user=username dbname=mydb sslmode=disable")
-	// if err != nil {
-	//     return err
-	// }
 	defer r.Db.Close()
 
 	// Check if the new phone number is already in use

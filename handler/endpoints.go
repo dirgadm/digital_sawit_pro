@@ -37,13 +37,23 @@ func (s *Server) PostRegistration(ctx echo.Context) error {
 	validationErrors := make(map[string]string)
 
 	// Validate phone number
-	// ...
+	if len(request.PhoneNumber) < 10 || len(request.PhoneNumber) > 13 {
+		validationErrors["phoneNumber"] = utils.LengthPhoneNumber
+	}
+	// Check if the phone number starts with "+62"
+	if request.PhoneNumber[:3] != "+62" {
+		validationErrors["phoneNumber"] += utils.StartingCode
+	}
 
 	// Validate full name
-	// ...
+	if len(request.FullName) < 3 || len(request.FullName) > 60 {
+		validationErrors["fullName"] = utils.LengthFullName
+	}
 
 	// Validate password
-	// ...
+	if !utils.IsStrongPassword(request.Password) {
+		validationErrors["password"] = utils.NotStrongPassword
+	}
 
 	if len(validationErrors) > 0 {
 		return ctx.JSON(http.StatusBadRequest, validationErrors)
@@ -79,7 +89,7 @@ func (s *Server) GetProfile(c echo.Context) error {
 	// Get the user's profile information
 	fullName, phoneNumber, err := s.Repository.GetMyProfile(context.Background(), userID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to fetch profile"})
+		return c.JSON(http.StatusForbidden, map[string]string{"error": "Failed to fetch profile"})
 	}
 
 	// Return the user's profile information
@@ -93,8 +103,10 @@ func (s *Server) PutProfile(c echo.Context) error {
 	var (
 		userID int
 		err    error
-		req    generated.PutProfileJSONRequestBody
 	)
+	validator := validator.New()
+
+	req := &generated.PutProfileJSONRequestBody{}
 	// Get the user ID from the JWT token
 	if userID, err = utils.GetUserIDFromToken(c); err != nil {
 		return err
@@ -105,18 +117,34 @@ func (s *Server) PutProfile(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
 	}
 
+	// Perform validation checks on request data
+	validationErrors := make(map[string]string)
+
+	// Validate phone number
+	if len(req.PhoneNumber) > 0 && len(req.PhoneNumber) < 10 || len(req.PhoneNumber) > 13 {
+		validationErrors["phoneNumber"] = utils.LengthPhoneNumber
+	}
+	// Check if the phone number starts with "+62"
+	if len(req.PhoneNumber) > 0 && req.PhoneNumber[:3] != "+62" {
+		validationErrors["phoneNumber"] += utils.StartingCode
+	}
+
+	// Validate full name
+	if len(req.FullName) > 0 && len(req.FullName) < 3 || len(req.FullName) > 60 {
+		validationErrors["fullName"] = utils.LengthFullName
+	}
+
+	if len(validationErrors) > 0 {
+		return c.JSON(http.StatusBadRequest, validationErrors)
+	}
+
 	// Validate the update profile request
-	if err := c.Validate(req); err != nil {
+	if err := validator.Struct(req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Validation failed"})
 	}
 
-	// Check if the provided phone number exists for another user
-	if _, _, err := s.Repository.GetMyProfile(context.Background(), userID, req.PhoneNumber); err != nil {
-		return c.JSON(http.StatusConflict, map[string]string{"error": "Phone number already exists for another user"})
-	}
-
 	if err := s.Repository.UpdateMyProfile(context.Background(), userID, req.PhoneNumber, req.FullName); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to update profile"})
+		return c.JSON(http.StatusConflict, map[string]string{"error": err.Error()})
 	}
 
 	// Return a success response
@@ -143,7 +171,7 @@ func (s *Server) PostLogin(ctx echo.Context) error {
 	// Hash the password before storing it in the database
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Internal server error"})
 	}
 
 	// Check if the provided phone number and password match a user in the database
@@ -158,7 +186,7 @@ func (s *Server) PostLogin(ctx echo.Context) error {
 	// Generate a JWT token for the user
 	jwtToken, err := utils.GenerateJWTToken(int(user.ID))
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate JWT token"})
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Failed to generate JWT token"})
 	}
 
 	// Return the user ID and JWT token

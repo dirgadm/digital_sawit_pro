@@ -25,5 +25,7 @@ type LoginAttempt struct {
 
 type Result struct {
 	ID           int    `json:"id"`
-	PasswordHash string `json:"password_hash"`
+	PasswordHash string `json:"passwordHash"`
+	FullName     string `json:"fullName"`
+	PhoneNumber  string `json:"phoneNumber"`
 }

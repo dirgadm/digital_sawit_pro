@@ -1,5 +1,10 @@
 # Backend Engineering Interview Assignment (Golang)
 
+# Note from Applicant
+1. After run command make init, please delete manually pointer from some struct from generated file within /generated
+2. UpdateProfileRequest, PostLoginJSONBody, PostRegistrationJSONBody
+3. I still dont fidure the way to generate those field without pointer although i already add nullabe: false in api.yaml 
+
 ## Requirements
 
 To run this project you need to have the following installed:

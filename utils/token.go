@@ -10,7 +10,7 @@ import (
 )
 
 // SecretKey should be a long, random string used to sign the JWT token.
-var SecretKey = []byte("your-secret-key")
+var SecretKey = []byte("sawit-pro-secure")
 
 // GetUserIDFromToken retrieves the user ID from a Bearer token stored in the Authorization header.
 func GetUserIDFromToken(c echo.Context) (int, error) {
@@ -19,7 +19,7 @@ func GetUserIDFromToken(c echo.Context) (int, error) {
 
 	// Check if the header value is empty or doesn't start with "Bearer "
 	if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-		return 0, echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+		return 0, echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 	}
 
 	// Extract the token string by removing "Bearer " prefix
@@ -29,7 +29,7 @@ func GetUserIDFromToken(c echo.Context) (int, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Check the signing method and set the secret key
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+			return nil, echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 		}
 		return SecretKey, nil
 	})
@@ -42,12 +42,12 @@ func GetUserIDFromToken(c echo.Context) (int, error) {
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID, ok := claims["userID"].(float64)
 		if !ok {
-			return 0, echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+			return 0, echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 		}
 		return int(userID), nil
 	}
 
-	return 0, echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
+	return 0, echo.NewHTTPError(http.StatusForbidden, "Invalid token")
 }
 
 func GenerateJWTToken(userID int) (string, error) {

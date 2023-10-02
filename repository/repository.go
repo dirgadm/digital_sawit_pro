@@ -17,6 +17,8 @@ type NewRepositoryOptions struct {
 }
 
 func NewRepository(opts NewRepositoryOptions) *Repository {
+	// db, err := sql.Open("postgres", opts.Dsn)
+
 	host := "localhost"
 	port := 5432
 	user := "postgres"
