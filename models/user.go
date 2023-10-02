@@ -22,3 +22,8 @@ type LoginAttempt struct {
 	LoginTime  time.Time
 	Successful bool `gorm:"not null"`
 }
+
+type Result struct {
+	ID           int    `json:"id"`
+	PasswordHash string `json:"password_hash"`
+}

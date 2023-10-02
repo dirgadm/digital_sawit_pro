@@ -6,7 +6,9 @@ import (
 	"net/http"
 
 	"github.com/SawitProRecruitment/UserService/generated"
+	"github.com/SawitProRecruitment/UserService/repository"
 	"github.com/SawitProRecruitment/UserService/utils"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 
 	"golang.org/x/crypto/bcrypt"
@@ -23,6 +25,7 @@ func (s *Server) Hello(ctx echo.Context, params generated.HelloParams) error {
 
 // (POST /registration)
 func (s *Server) PostRegistration(ctx echo.Context) error {
+	s.Repository = repository.NewRepository(repository.NewRepositoryOptions{})
 
 	var request generated.PostRegistrationJSONBody
 
@@ -52,7 +55,6 @@ func (s *Server) PostRegistration(ctx echo.Context) error {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
 	}
 
-	fmt.Println(request.PhoneNumber, "------------", request.FullName, "---------------", string(hashedPassword), "----------------", s)
 	userID, err := s.Repository.RegisterUser(context.Background(), request.PhoneNumber, request.FullName, string(hashedPassword))
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create user"})
@@ -64,6 +66,7 @@ func (s *Server) PostRegistration(ctx echo.Context) error {
 
 // GetProfile retrieves the user's profile
 func (s *Server) GetProfile(c echo.Context) error {
+	s.Repository = repository.NewRepository(repository.NewRepositoryOptions{})
 	// Get the user ID from the JWT token
 	var (
 		userID int
@@ -85,6 +88,7 @@ func (s *Server) GetProfile(c echo.Context) error {
 
 // PutProfile updates the user's profile
 func (s *Server) PutProfile(c echo.Context) error {
+	s.Repository = repository.NewRepository(repository.NewRepositoryOptions{})
 
 	var (
 		userID int
@@ -121,30 +125,42 @@ func (s *Server) PutProfile(c echo.Context) error {
 
 // (POST /login)
 func (s *Server) PostLogin(ctx echo.Context) error {
+	s.Repository = repository.NewRepository(repository.NewRepositoryOptions{})
 
 	var req generated.PostLoginJSONRequestBody
+
+	validator := validator.New()
 
 	// Bind the request with body to the req variable
 	if err := ctx.Bind(&req); err != nil {
 		return err
 	}
 	// Validate the login request
-	if err := ctx.Validate(req); err != nil {
+	if err := validator.Struct(req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Validation failed"})
 	}
 
-	// Check if the provided phone number and password match a user in the database
-	userID, err := s.Repository.LoginUser(context.Background(), req.PhoneNumber, req.Password)
+	// Hash the password before storing it in the database
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Internal server error"})
+	}
+
+	// Check if the provided phone number and password match a user in the database
+	user, err := s.Repository.LoginUser(context.Background(), req.PhoneNumber, string(hashedPassword))
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password))
+
+	if err != nil {
+
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Login failed"})
 	}
 
 	// Generate a JWT token for the user
-	jwtToken, err := utils.GenerateJWTToken(userID)
+	jwtToken, err := utils.GenerateJWTToken(int(user.ID))
 	if err != nil {
 		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate JWT token"})
 	}
 
 	// Return the user ID and JWT token
-	return ctx.JSON(http.StatusOK, map[string]interface{}{"userId": userID, "jwtToken": jwtToken})
+	return ctx.JSON(http.StatusOK, map[string]interface{}{"userId": user.ID, "jwtToken": jwtToken})
 }

@@ -3,6 +3,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
@@ -16,7 +17,13 @@ type NewRepositoryOptions struct {
 }
 
 func NewRepository(opts NewRepositoryOptions) *Repository {
-	db, err := sql.Open("postgres", opts.Dsn)
+	host := "localhost"
+	port := 5432
+	user := "postgres"
+	password := "postgres"
+	dbname := "database"
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		panic(err)
 	}

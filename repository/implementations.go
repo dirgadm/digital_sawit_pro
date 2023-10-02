@@ -3,7 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
+	"github.com/SawitProRecruitment/UserService/models"
 	"github.com/SawitProRecruitment/UserService/utils"
 )
 
@@ -37,33 +39,33 @@ func (r *Repository) RegisterUser(ctx context.Context, phoneNumber, fullName, pa
 	return id, nil
 }
 
-func (r *Repository) LoginUser(ctx context.Context, phoneNumber, passwordHash string) (out int, err error) {
+func (r *Repository) LoginUser(ctx context.Context, phoneNumber, passwordHash string) (out *models.Result, err error) {
 	// db, err := sql.Open("postgres", "user=username dbname=mydb sslmode=disable")
 	// if err != nil {
 	//     return 0, err
 	// }
+	out = new(models.Result)
+
 	defer r.Db.Close()
-
-	var id int
 	err = r.Db.QueryRowContext(ctx, `
-        SELECT id FROM users WHERE phone_number = $1 AND password_hash = $2
-    `, phoneNumber, passwordHash).Scan(&id)
-
+        SELECT id,password_hash FROM users WHERE phone_number = $1
+    `, phoneNumber).Scan(&out.ID, &out.PasswordHash)
+	fmt.Println(out, "------------------->", err)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	// Insert a successful login attempt
 	_, err = r.Db.Exec(`
         INSERT INTO login_attempts (user_id, successful)
         VALUES ($1, true)
-    `, id)
+    `, out.ID)
 
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return id, nil
+	return out, nil
 }
 
 func (r *Repository) GetMyProfile(ctx context.Context, userID int, anotherAttr ...string) (phoneNumber string, fullName string, err error) {
